@@ -139,6 +139,7 @@ while True:
                     time.sleep(60)
                     maxs = 1
         session.close()
+    f.close
     print("pausing " + prompt)
     time.sleep(timeToWaitSeconds)
     print("Completed session") 
