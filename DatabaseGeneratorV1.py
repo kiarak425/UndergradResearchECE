@@ -116,6 +116,7 @@ while True:
         # using our new list of Starlink satellite NORAD_CAT_IDs, we can now get the OMM message
             
             # i am a comment
+            # lets see if this works
         maxs = 1
         for s in satIds:
             resp = session.get(uriBase + requestCmdAction + requestOMMStarlink1 + s + requestOMMStarlink2)
