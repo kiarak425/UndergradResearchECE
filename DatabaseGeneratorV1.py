@@ -135,14 +135,14 @@ while True:
             
             maxs = maxs + 1
             if maxs > 18:
-                    break
+                    
                     print("Snoozing for 60 secs for rate limit reasons (max 20/min and 200/hr)...")
                     time.sleep(60)
                     maxs = 1
         session.close()
     
     f.close
-    break
+    
     print("Completed session") 
     print("pausing " + prompt)
     time.sleep(timeToWaitSeconds)
