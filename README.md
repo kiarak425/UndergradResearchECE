@@ -12,7 +12,7 @@ You might notice it has some change notifications this is because if I run the c
 There are a couple TODOs ranked in order of most important
 !!! Add way for the geometry engine to stop the data collection loop (not the pause portion) and close the text file. If the text file isn't closed some data is lost. 
 
-!! Find a new query that only gets the most recent OMM data from space track. Currently the code is getting all historical data which was fine for the source code which only tracked starlink satellites with less historical data but not so much for iridum.
+(completed 2/17) Find a new query that only gets the most recent OMM data from space track. Currently the code is getting all historical data which was fine for the source code which only tracked starlink satellites with less historical data but not so much for iridum. 
 
 !! add way for the code to check if a satellite has decayed, this will likely be checking the epoch and if that epoch was more than a year (month?) ago the code will not output its data to the text file.
 
