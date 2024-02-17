@@ -36,9 +36,10 @@ class MyError(Exception):
         self.args = args
 
 # See https://www.space-track.org/documentation for details on REST queries
-# the "Find Starlinks" query searches all satellites with NORAD_CAT_ID > 40000, with OBJECT_NAME matching STARLINK*, 1 line per sat
-# the "OMM Starlink" query gets all Orbital Mean-Elements Messages (OMM) for a specific NORAD_CAT_ID in JSON format
+# the "Find Iridium" query searches all satellites with OBJECT_NAME matching "iridium", 1 line per sat
+# the "OMM Iridium" query gets the latest Orbital Mean-Elements Messages (OMM) for a specific NORAD_CAT_ID in JSON format
 # (Jackson) leaving above comment in in case readers curious how queries were made 
+        # note above comment was edited to match new queries
 # (Jackson) current query was edited from a suggested query by Space Track admim 
         # The reason for editing it is because the query output an HTML which wasn't useful to us     
 
@@ -46,8 +47,8 @@ uriBase                = "https://www.space-track.org"
 requestLogin           = "/ajaxauth/login"
 requestCmdAction       = "/basicspacedata/query" 
 requestFindIridiums   = "/class/gp/GP_ID/%3E/OBJECT_TYPE/payload/orderby/GP_ID%20desc/format/json/OBJECT_NAME/iridium~~/"
-requestOMMStarlink1    = "/class/omm/NORAD_CAT_ID/"
-requestOMMStarlink2    = "/orderby/EPOCH%20desc/limit/1/emptyresult/show"
+requestOMMIridium1    = "/class/omm/NORAD_CAT_ID/"
+requestOMMIridium2    = "/orderby/EPOCH%20desc/limit/1/emptyresult/show"
 
 timeToWaitSeconds = 43200
 prompt = str(timeToWaitSeconds)
@@ -129,7 +130,7 @@ while True:
         # (Jackson) This is another loop that uses the array of NORAD_CAT_IDs to get specific data
         maxs = 1
         for s in satIds:
-            resp = session.get(uriBase + requestCmdAction + requestOMMStarlink1 + s + requestOMMStarlink2)
+            resp = session.get(uriBase + requestCmdAction + requestOMMIridium1 + s + requestOMMIridium2)
             if resp.status_code != 200:
                     # If you are getting error 500's here, its probably the rate throttle on the site (20/min and 200/hr)
                     # wait a while and retry
