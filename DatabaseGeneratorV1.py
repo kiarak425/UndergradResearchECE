@@ -159,8 +159,8 @@ while True:
         session.close()
     # (Jackson) This closes the text file 
          # important as a bug fix where check it after the code had done 1 loop some later data didn't save
+    # (TO DO) add a way for the geometry engine to pause data collection and save the text file
     f.close
-    
     print("Completed session") 
     print("pausing " + prompt)
     time.sleep(timeToWaitSeconds)
