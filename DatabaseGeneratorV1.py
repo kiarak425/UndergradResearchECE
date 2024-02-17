@@ -47,7 +47,7 @@ requestLogin           = "/ajaxauth/login"
 requestCmdAction       = "/basicspacedata/query" 
 requestFindIridiums   = "/class/gp/GP_ID/%3E/OBJECT_TYPE/payload/orderby/GP_ID%20desc/format/json/OBJECT_NAME/iridium~~/"
 requestOMMStarlink1    = "/class/omm/NORAD_CAT_ID/"
-requestOMMStarlink2    = "/orderby/EPOCH%20asc/format/limit/1/json"
+requestOMMStarlink2    = "/orderby/EPOCH%20desc/limit/1/emptyresult/show"
 
 timeToWaitSeconds = 43200
 prompt = str(timeToWaitSeconds)
