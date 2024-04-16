@@ -46,9 +46,16 @@ class MyError(Exception):
 uriBase                = "https://www.space-track.org"
 requestLogin           = "/ajaxauth/login"
 requestCmdAction       = "/basicspacedata/query" 
+<<<<<<< Updated upstream
 requestFindIridiums   = "/class/gp/GP_ID/%3E/OBJECT_TYPE/payload/orderby/GP_ID%20desc/format/json/OBJECT_NAME/iridium~~/"
 requestOMMIridium1    = "/class/omm/NORAD_CAT_ID/"
 requestOMMIridium2    = "/orderby/EPOCH%20desc/limit/1/emptyresult/show"
+=======
+requestFindIridiums    = "/class/gp/GP_ID/%3E/OBJECT_TYPE/payload/orderby/GP_ID%20desc/format/json/OBJECT_NAME/iridium~~/"
+requestFindStarlinks   = "/class/gp/GP_ID/%3E/OBJECT_TYPE/payload/orderby/GP_ID%20desc/format/json/OBJECT_NAME/starlink~~/"
+requestOMMStarlink1    = "/class/omm/NORAD_CAT_ID/"
+requestOMMStarlink2    = "/orderby/EPOCH%20desc/limit/1/emptyresult/show"
+>>>>>>> Stashed changes
 
 timeToWaitSeconds = 43200
 prompt = str(timeToWaitSeconds)
@@ -64,14 +71,14 @@ TPI86 = 2.0 * PI / 86400.0
 
 # ACTION REQUIRED FOR YOU:
 #=========================
-# Provide a config file in the same directory as this file, called SLTrack.ini, with this format (without the # signs)
+# Provide a config file in the same directory as this file, called MOSAIC_database.ini, with this format (without the # signs)
 # [configuration]
 
 # (Jackson) this is done it is already in SWIFT-UDP server with below information
 # there is a reduntant add on with the output but I'm leaving it in case I need to debug with the source code
 
 # username = "ajackson03@vt.edu"
-# password = let me know if you need the password I use the same one for almost all VT related logins
+# password = "Swift-UDP1234567"
 # output = "STLtrack.xlsx"
 #
 # ... where XXX and YYY are your www.space-track.org credentials (https://www.space-track.org/auth/createAccount for free account)
@@ -79,24 +86,78 @@ TPI86 = 2.0 * PI / 86400.0
 
 # Use configparser package to pull in the ini file (pip install configparser)
 config = configparser.ConfigParser()
-config.read("./SLTrack.ini")
+config.read("./MOSAIC_database.ini")
 configUsr = config.get("configuration","username")
 configPwd = config.get("configuration","password")
 configOut = config.get("configuration","output")
 siteCred = {'identity': configUsr, 'password': configPwd}
+# update speed from config file
+speedStr = config.get("configuration","speed")
+# if (int(temp)>12):
+#     ## (to do) tell user they are stupid the max speed is 12 satellites before breaking
+# being mod 12 because I don't want to get an API violation from bad requests
+speed = int(speedStr) % 12
+# get operation mode
+demandPull = config.get("configuration","demandPull")
+# get on demand satellite
+onDemandSatellite = config.get("configuration","demandRequest")
 
+
+now = datetime.now()
+nowStr = now.strftime("%m/%d/%Y %H:%M:%S")
+log = open("databaseLog.txt",'a')
+log.write("\n" + nowStr + " Started operation")
+if (demandPull == '1'):
+     log.write("\n Mode: Demand Pull")
+     log.write("\n Satellite: " + onDemandSatellite)
+else:
+    log.write("\n Mode: Normal Operation")
+    log.write("\n Speed: " + speedStr)
+log.close
+log = open("databaseLog.txt", 'r')
+log.close
+
+
+if (demandPull == '1'):
+    with requests.Session() as session:
+        # run the session in a with block to force session to close if we exit
+        
+
+        # need to log in first. note that we get a 200 to say the web site got the data, not that we are logged in
+        resp = session.post(uriBase + requestLogin, data = siteCred)
+        if resp.status_code != 200:
+            raise MyError(resp, "POST fail on login")
+        
+        
+        resp = session.get(uriBase + requestCmdAction + requestOMMStarlink1 + onDemandSatellite + requestOMMStarlink2)
+        if resp.status_code != 200:
+            # If you are getting error 500's here, its probably the rate throttle on the site (20/min and 200/hr)
+            # wait a while and retry
+            print(resp)
+            raise MyError(resp, "GET fail on request for Iridum satellite " + onDemandSatellite)
+        retData = json.loads(resp.text)
+        e = retData[-1]
+        # Writes TLE data to the text file
+        print(e['TLE_LINE0'] + "," + e['TLE_LINE1'] + "," + e['TLE_LINE2'] + '\n')
+        f = open("MOSAIC_on_demand.txt", "w")
+        now = datetime.now()
+        nowStr = now.strftime("%m/%d/%Y %H:%M:%S")
+        f.write(nowStr + "\n")          
+        f.write(e['TLE_LINE0'] + "," + e['TLE_LINE1'] + "," + e['TLE_LINE2'] + '\n') 
+        f.close
+        f=open("MOSAIC_on_demand.txt", "r")
+        f.close
+        log = open("databaseLog.txt",'a')
+        log.write("\n" + nowStr + " Completed on demand Satellite Request for " + onDemandSatellite)
+        log.close
+        log = open("databaseLog.txt", 'r')
+        log.close
+        
 
  # (Jackson) This is an add on I made such that it runs continuously
 while True:
-    # use requests package to drive the RESTful session with space-track.org
-        # get a time variable
-    now = datetime.now()
-    nowStr = now.strftime("%m/%d/%Y %H:%M:%S")
-
-    # (Jackson) open text file and write current time to it for debugging purposes
-    f = open("sltrack_iridium.txt", "w")
-    f.write(nowStr + "\n")
-
+    if (demandPull == '1'):
+        break
     with requests.Session() as session:
         # run the session in a with block to force session to close if we exit
 
@@ -105,18 +166,19 @@ while True:
         if resp.status_code != 200:
             raise MyError(resp, "POST fail on login")
 
-        # this query picks up all Starlink satellites from the catalog. Note - a 401 failure shows you have bad credentials 
+        # this query picks up all Iridium satellites from the catalog. Note - a 401 failure shows you have bad credentials 
         # (Jackson) needs to get the list of all iridium satellites to later loop through 
         resp = session.get(uriBase + requestCmdAction + requestFindIridiums)
         if resp.status_code != 200:
             print(resp)
-            raise MyError(resp, "GET fail on request for Starlink satellites")
+            raise MyError(resp, "GET fail on request for Iridium satellites")
 
         # use the json package to break the json formatted response text into a Python structure (a list of dictionaries)
         # (Jackson) parses above command to get loop ready
         retData = json.loads(resp.text)
         satCount = len(retData)
         satIds = []
+        Satellites = []
 
         # (Jackson) The start of the loop
         # Loop uses e as the pointer to each omm of that satellite gained from the original search
@@ -137,31 +199,119 @@ while True:
                     print(resp)
                     raise MyError(resp, "GET fail on request for Iridum satellite " + s)
 
-                # the data here can be quite large, as it's all the elements for every entry for one Iridium satellite
-                # (TO DO) need to find a better query that just gets the latest OMM 
             retData = json.loads(resp.text)
             e = retData[-1]
-            print("Scanning satellite " + e['OBJECT_NAME'] + " at epoch " + e['EPOCH'])
+            # print("Scanning satellite " + e['OBJECT_NAME'] + " at epoch " + e['EPOCH'])
             # Writes TLE data to the text file
-            f.write(e['TLE_LINE0'] + "\n")
-            f.write(e['TLE_LINE1'] + "\n")
-            f.write(e['TLE_LINE2'] + "\n") 
+            if e['DECAYED'] != '1':
+                Satellites.append(e['TLE_LINE0'] + "," + e['TLE_LINE1'] + "," + e['TLE_LINE2'] + '\n')
             
             maxs = maxs + 1
             # (Jackson) This is a change from the original program where I changed the if statement from 
             # comparing 18 to comparing 5 because of getting lots of API violations
             # I think that because Starlink satellites don't have as much history this wasn't a problem
             # with starlink satellites but Iridium has been around longer which causes issues
-            if maxs > 5:
+            if maxs > 10:
                     
-                    print("Snoozing for 60 secs for rate limit reasons (max 20/min and 200/hr)...")
+                    
+                    # print("Snoozing for 60 secs for rate limit reasons")
                     time.sleep(60)
                     maxs = 1
+        now = datetime.now()
+        nowStr = now.strftime("%m/%d/%Y %H:%M:%S")
+        log = open("databaseLog.txt",'a')
+        log.write("\n" + nowStr + " Completed collection of Iridium satellites")
+        log.close
+        log = open("databaseLog.txt", 'r')
+        log.close
+        # START STARLINK SATELLITE FINDING
+
+        # this query picks up all Starlink satellites from the catalog. Note - a 401 failure shows you have bad credentials 
+        # (Jackson) needs to get the list of all iridium satellites to later loop through 
+        resp = session.get(uriBase + requestCmdAction + requestFindStarlinks)
+        if resp.status_code != 200:
+            print(resp)
+            raise MyError(resp, "GET fail on request for Starlink satellites")
+
+        # use the json package to break the json formatted response text into a Python structure (a list of dictionaries)
+        # (Jackson) parses above command to get loop ready
+        retData = json.loads(resp.text)
+        satCount = len(retData)
+        satIds = []
+
+        # (Jackson) The start of the loop
+        # Loop uses e as the pointer to each omm of that satellite gained from the original search
+        # builds an array of NORAD_CA_IDs to be later used in getting specific data
+        for e in retData:
+            # each e describes the latest elements for one Starlink satellite. We just need the NORAD_CAT_ID 
+            catId = e['NORAD_CAT_ID']
+            satIds.append(catId)
+
+        # using our new list of Iridium NORAD_CAT_IDs, we can now get the OMM message
+        # (Jackson) This is another loop that uses the array of NORAD_CAT_IDs to get specific data
+        maxs = 1
+        for s in satIds:
+            resp = session.get(uriBase + requestCmdAction + requestOMMStarlink1 + s + requestOMMStarlink2)
+            if resp.status_code != 200:
+                    # If you are getting error 500's here, its probably the rate throttle on the site (20/min and 200/hr)
+                    # wait a while and retry
+                    print(resp)
+                    raise MyError(resp, "GET fail on request for Iridum satellite " + s)
+
+            retData = json.loads(resp.text)
+            e = retData[-1]
+            # print("Scanning satellite " + e['OBJECT_NAME'] + " at epoch " + e['EPOCH'])
+            # Writes TLE data to the text file
+            if e['DECAYED'] != '1':
+                Satellites.append(e['TLE_LINE0'] + "," + e['TLE_LINE1'] + "," + e['TLE_LINE2'] + '\n')
+            
+            maxs = maxs + 1
+            # (Jackson) This is a change from the original program where I changed the if statement from 
+            # comparing 18 to comparing 5 because of getting lots of API violations
+            # I think that because Starlink satellites don't have as much history this wasn't a problem
+            # with starlink satellites but Iridium has been around longer which causes issues
+            if maxs > 10:
+                    
+                    # print("Snoozing for 60 secs for rate limit reasons")
+                    time.sleep(60)
+                    maxs = 1     
+
+
+
         session.close()
-    # (Jackson) This closes the text file 
-         # important as a bug fix where check it after the code had done 1 loop some later data didn't save
     # (TO DO) add a way for the geometry engine to pause data collection and save the text file
+        # use requests package to drive the RESTful session with space-track.org
+        # get a time variable
+
+    now = datetime.now()
+    nowStr = now.strftime("%m/%d/%Y %H:%M:%S")
+    log = open("databaseLog.txt",'a')
+    log.write("\n" + nowStr + " Completed collection of Starlink satellites")
+    log.close
+    log = open("databaseLog.txt", 'r')
+    log.close
+
+
+    # (Jackson) open text file and write current time to it for debugging purposes
+    f = open("MOSAIC_tracked.txt", "w")
+
+    f.write(nowStr + "\n")    
+
+    # (Jackson) export the entirety of the Satellites array into the file the save it
+    # (Jackson) edit out satellites that have decayed
+    for x in Satellites:
+        f.write(x)   
+        
     f.close
+
+    # (Jackson) Yea I don't know, Unless I check that the program saved the file it wouldn't save the file
+    # not sure how to fix it but this solution works
+    f = open("MOSAIC_tracked.txt", "r")
+    f.close
+
+    # (Jackson) Clear satellites variable and prepare for the next loop
+    Satellites.clear
     print("Completed session") 
-    print("pausing " + prompt)
+    print("Pausing " + prompt + " minutes")
     time.sleep(timeToWaitSeconds)
+    
