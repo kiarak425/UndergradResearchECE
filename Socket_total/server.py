@@ -4,7 +4,7 @@ import serverSupport
 import time
 
 # Server configuration
-HOST = '192.168.1.99'  # Localhost
+HOST = '0.0.0.0'  # Localhost
 PORT = 3310  # Port to listen on
 START_TIME = time.time() # for server uptime
 
@@ -59,9 +59,16 @@ def handle_client(client_socket, address):
                     
                 elif args[1] == 'tle':
                     if len(args) == 6 and args[2] == '-s' and args[4] == '-n':
-                        # Output: <TLE>
-                            # output the tle from a file according to noradID                        
-                        response = "<TLE>"
+                        norad_id = args[5]
+                        
+                        tle_info = serverSupport.get_tle(norad_id)
+                            
+                        if tle_info:
+                            response = tle_info
+                        else:
+                            response = f"TLE data not found for NORAD ID: {norad_id}"
+                    else:
+                        response = "Invalid arguments"
                         
                 elif args[1] == 'longname':
                     if len(args) == 6 and args[2] == '-s' and args[4] == '-n':

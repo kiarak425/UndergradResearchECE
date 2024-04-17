@@ -1,1 +1,1 @@
-mosaic ping -s 192.168.0.105:3310 
+mosaic tle -s hostname -n 43570 
