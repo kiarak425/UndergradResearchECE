@@ -62,15 +62,35 @@ def velocityAtTime(number,time,position):
     vel = rates[5]
     return vel.m_per_s
 
+def positionAtTime(number,time,position):
+    tempsatellite = satelliteFinderID(number)
+    #Gets the satellite data loaded from a tle
+    satellite = EarthSatellite(tempsatellite[2], tempsatellite[3], tempsatellite[0])
+
+    difference = satellite - position
+    #Gets the satellite's position
+    satFromDiff = difference.at(time)
+
+    alt, az, distance = satFromDiff.altaz()
+    # print('Altitude:', alt.degrees)
+    # print('Azimuth:', az.degrees)
+    # print('Distance: {:.1f} km'.format(distance.km))
+    return [alt.radians, az.radians]
 
 def dopplerEffect(number,time,position,fInput):
-    x = velocityAtTime(number,time,position)
+    altaz = positionAtTime(number,time, position)
+    if(altaz[0]>0):
 
-    c = 3*10**8
 
-    fRecieved = (c/(c+x))*fInput
+        x = velocityAtTime(number,time,position)
 
-    return fRecieved
+        c = 3*10**8
+
+        fRecieved = (c/(c+x))*fInput
+
+        return fRecieved
+    else:
+        return "Error: Satellite not in the sky at this time"
 
 # generate a specific time in UTC
 ts = load.timescale()
@@ -82,7 +102,8 @@ thisMorning = ts.from_datetime(intermediate)
 # generate a specific location
 blacksburg = wgs84.latlon(37.2296 * N, 80.4139 * W)
 
-x = dopplerEffect('43927',thisMorning,blacksburg,1610*10**6)
+x = dopplerEffect('41866',thisMorning,blacksburg,1610*10**6)
 print(x)
+
 
 
