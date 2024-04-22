@@ -103,6 +103,7 @@ There are 2 different ways to get the position of the sun in real time. The firs
 1. To start I'd recommend finding your location on suncalc. From there take note of the time you wish to verify with skyfield. In this case I chose 8am. Suncalc doesn't give UTC dates but in the same place as finding the time it tells you the difference from UTC the location you input is. In my case Blacksburg is UTC-4 so I would add 4 to the time in skyfield to get accurate position data of the sun. Make note of the time in UTC you wish to compare. Below I put a picture of the output of suncalc.
 
 ![Suncalc](https://github.com/kiarak425/UndergradResearchECE/blob/main/assets/Suncalc%20az%20alt.png)
+
 2. Next use the code below to get the time for the use of the .at() function. Make sure to use the UTC time. Here I have input April 22nd 8 am in Blacksburg. Make note of the variable set to the skyfield time variable in my case this variable is thisMorning.
 ```
 # generate a specific time in UTC
