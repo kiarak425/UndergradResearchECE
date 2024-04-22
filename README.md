@@ -69,7 +69,7 @@ The entirety of this project is based around the correct functioning of the skyf
 To verifiy the position of a satellite I recommend using [NY20](https://www.n2yo.com/). This site does real time tracking of satellites including LEO satellites such as the starlink and iridium satellites. This section will outline how to check the position of the international space station, ISS, but it is just as easy to use any other satellite with this method. To use any satellite use the 'find satellite' section in the top right of the mainpage. Put in the NORAD ID  of the satellite you wish to track and click the 'track it' button.
 
 1. Opening up N2Y0 from the homepage will have the ISS already tracked.
-![test](file:///C:/Users/Jackg/Pictures/Screenshots/N2YO%20tracking%20the%20space%20station.png)
+![test](https://github.com/kiarak425/UndergradResearchECE/blob/main/assets/N2YO%20tracking%20the%20space%20station.png)
 2. 
 
 # Side Projects 
