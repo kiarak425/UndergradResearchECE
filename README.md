@@ -68,9 +68,31 @@ The entirety of this project is based around the correct functioning of the skyf
 ### Verifying the position of a satellite
 To verifiy the position of a satellite I recommend using [NY20](https://www.n2yo.com/). This site does real time tracking of satellites including LEO satellites such as the starlink and iridium satellites. This section will outline how to check the position of the international space station, ISS, but it is just as easy to use any other satellite with this method. To use any satellite use the 'find satellite' section in the top right of the mainpage. Put in the NORAD ID  of the satellite you wish to track and click the 'track it' button.
 
-1. Opening up N2Y0 from the homepage will have the ISS already tracked.
-![test](\UndergradResearchECE\assets\N2YO tracking the space station.png)
-2. 
+1. Opening up N2Y0 from the homepage will have the ISS already tracked. You should see a section for azimuth and elevation. Make note of the aziumth and elevation as well as the UTC time, this is what we will be referencing to check that skyfield is working.
+![N2YO output](https://github.com/kiarak425/UndergradResearchECE/tree/main/assets)
+2. Open up a file with the function dependencies for the positionAtTime() function. If you are unsure of how to do this use skyfield_testing.py file under database_total. This script is designed to have all functions and imports such that it is easy to test that skyfield is working.
+3. Using your favorite debugger of which I recommend VScode's python debugger which is already set up in that directory pause at the output of the positionAtTime() function. Now write the below code. Replace the testtime.replace time with the UTC time you found from N2YO. Here the UTC time is 12:40 on April 22nd. I recommend rounding to the nearst 5 minutes but skyfield has been accurate to the nearest 1 minute in previous tests. Make note of the variable defined on the last line. Here I am using 'thisMorning'.
+```
+# generate a specific time in UTC
+ts = load.timescale()
+testtime = dt.fromisoformat('2011-11-04 00:05:23.283')
+testtime= testtime.replace(tzinfo=utc)      # to fix an existing datetime   
+intermediate = testtime.replace(year = 2024, day = 22, month = 4, minute= 40, hour = 12, second= 0, microsecond=0)
+thisMorning = ts.from_datetime(intermediate)
+```
+4. Next you're going to want to set your location seen from N2YO. I recommend copying the below code. Here I am using blacksburg which is at 37.2296 N and 80.4139 W. Make note of the varaible defined. Here I am using the variable 'blacksburg'
+```
+# generate a specific location
+blacksburg = wgs84.latlon(37.2296 * N, 80.4139 * W)
+```
+5. Finally call the positionAtTime() function. Before we were setting all the variables we needed to make sure the positionAtTime() function had everything it needed to accurate get the Azimuth and Elevation of a satellite. I put the code for the function call below. In this case I've set the output to a random variable x. If you don't have a debugger I'd recommend editing the positionAtTime() function to output degrees then print the output of the positionAtTime() function to the command line. 
+```
+x = positionAtTime("25544",thisMorning, blacksburg)
+```
+6. With the dubugger check the alt and az variables defined in the positionAtTime() function. These values should be accurate within a degree. Note: expect some inaccuracy due to the fact that a TLE is a guess as to where a satellite will be and is increasingly inaccurate from times different from it's epoch. I show the output of my function call below.
+![skyfield output](https://github.com/kiarak425/UndergradResearchECE/blob/main/assets/skyfieldTrackingSpaceStation.png)
+
+
 
 # Side Projects 
 The purpose of the side projects section is to work on possible features of the MOSAIC program for radio astronomy. These projects typically borrow heavily from the geometry engine but lack server communication. Typically these features will be implemented as functions to later be added the geometry engine as a whole or used by other interested parties in their own scripts. 
