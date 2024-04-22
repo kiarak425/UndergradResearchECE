@@ -93,11 +93,13 @@ blacksburg = wgs84.latlon(37.2296 * N, 80.4139 * W)
 x = positionAtTime("25544",thisMorning, blacksburg)
 ```
 6. With the dubugger check the alt and az variables defined in the positionAtTime() function. These values should be accurate within a degree. Note: expect some inaccuracy due to the fact that a TLE is a guess as to where a satellite will be and is increasingly inaccurate from times different from it's epoch. I show the output of my function call below.
+
 ![skyfield output](https://github.com/kiarak425/UndergradResearchECE/blob/main/assets/skyfieldTrackingSpaceStation.png)
 
 ### Verifying the position of the sun
 There are 2 different ways to get the position of the sun in real time. The first is to go outside and physically measure the azimuth and elevation of that "big glowing thing in the sky" with a compass and protractor. The second best way is with [suncalc](https://www.suncalc.org/#/37.2258,-80.4101,12/2024.04.22/08:01/1/3). Here I've linked the sun calc position of blacksburg on April 22nd.
-1. To start I'd recommend finding your location on suncalc. From there take note of the time you wish to verify with skyfield. In this case I chose 8am. Suncalc doesn't give UTC dates but in the same place as finding the time it tells you the difference from UTC the location you input is. In my case Blacksburg is UTC-4 so I would add 4 to the time in skyfield to get accurate position data of the sun. Make note of the time in UTC you wish to compare. Below I put a picture of the output of suncalc
+1. To start I'd recommend finding your location on suncalc. From there take note of the time you wish to verify with skyfield. In this case I chose 8am. Suncalc doesn't give UTC dates but in the same place as finding the time it tells you the difference from UTC the location you input is. In my case Blacksburg is UTC-4 so I would add 4 to the time in skyfield to get accurate position data of the sun. Make note of the time in UTC you wish to compare. Below I put a picture of the output of suncalc.
+
 ![Suncalc](https://github.com/kiarak425/UndergradResearchECE/blob/main/assets/Suncalc%20az%20alt.png)
 2. Next use the code below to get the time for the use of the .at() function. Make sure to use the UTC time. Here I have input April 22nd 8 am in Blacksburg. Make note of the variable set to the skyfield time variable in my case this variable is thisMorning.
 ```
@@ -123,6 +125,7 @@ goeblacksburg = earth+ wgs84.latlon(37.2296 * N, 80.4139 * W)
 x = goeblacksburg.at(thisMorning).observe(sun)
 alt, az, d = x.apparent().altaz()
 ```
+
 ![sunfromskyfield](https://github.com/kiarak425/UndergradResearchECE/blob/main/assets/skyfieldsunfinding.png)
  
 
