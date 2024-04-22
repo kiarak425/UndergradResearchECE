@@ -89,7 +89,7 @@ def generateDistance(day, month, SatelliteID):
     testtime= testtime.replace(tzinfo=utc)      # to fix an existing datetime   
     out = [0]*1440
     for x in range(0,24):
-    # (part 2) edites the generic time with int values
+    # edits the generic time with int values
         for y in range(0,60):
             realTime = testtime.replace(year = 2024, day = day, month = month, minute= y, hour = x, second= 0, microsecond=0)
 
