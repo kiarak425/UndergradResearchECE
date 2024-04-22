@@ -1,6 +1,6 @@
 # MOSAIC
 
-## Database
+## database
 
 This part of the project is meant to get the most accurate and most recent data from SpaceTrack.org 
 
@@ -41,41 +41,10 @@ There are a couple TODOs ranked in order of most important
 
 ! have way to respond to server for on demand pull with TLE. Currently the program just prints the TLE to a text file. 
 
-## Geometry Engine
-
-The Geometry Engine is meant to parse through the TLE file in the Database Engine Repository. Furthermore, this iterates throughout the TLE files to get the most recent data and be able to create a list of satellite information.
-
-## Socket
-
-This socket is a command-line tool designed for various satellite tracking operations. It provides the ability to perform tasks such as checking server status, locating satellites, retrieving TLEs (Two-Line Element) data, obtaining long names of satellites, and predicting the next pass of a satellite. This code is paired with a Geometry Engine and a Back-End Database.
-
-# "How to"s
-## Generating Skyfield Time and Position 
-There are a couple of ways to generate a Skyfield time and position but this is a method I've found is the easiest to edit on the fly to dedicate more of my time to actually working one the MOSAIC project. Using the code I put below I recommend generating a general time using pythons date and time function shown here as testtime where I set that testtime to a random time of no significance. Then to make sure this time can later be converted into the skyfields time format it is necesary to set the timezone to UTC. Finally where I set intermediate I recommend changing the values in year, day, month, minute and hour to values of more significance. I don't recommend touching seconds and microseconds as the .at() function from skyfield doesn't differentiate between seconds or lower but I left those values in just incase an interested party wanted to see the whole picture. Finally create a variable with a significant name value and use the ts.from_datetime() skyfield function to turn your intermediate datetime into a skyfield time. To get position is much easier. As I have it written I recommend only changing the latitude and longitude of the wgs84.latlon() function. Here I show how one would make blacksburg in skyfield position format. 
-
-```
-# generate a specific time in UTC
-ts = load.timescale()
-testtime = dt.fromisoformat('2011-11-04 00:05:23.283')
-testtime= testtime.replace(tzinfo=utc)      # to fix an existing datetime   
-intermediate = testtime.replace(year = 2024, day = 16, month = 4, minute= 0, hour = 5, second= 0, microsecond=0)
-thisMorning = ts.from_datetime(intermediate)
-```
-
-## Verifying skyfield is working 
-The entirety of this project is based around the correct functioning of the skyfield library and the accuracy of the TLEs gained from [space-track](https://www.space-track.org/documentation). To verify the system is working there are a number of sites that do real time tracking of celestial objects. We can use these sites to check the accuracy of our program by setting the time to as close to the current time and seeing if the site and program agrees. This section details completing this check for a satellite and the sun. 
-
-### Verifying the position of a satellite
-To verifiy the position of a satellite I recommend using [NY20](https://www.n2yo.com/). This site does real time tracking of satellites including LEO satellites such as the starlink and iridium satellites. This section will outline how to check the position of the international space station, ISS, but it is just as easy to use any other satellite with this method. To use any satellite use the 'find satellite' section in the top right of the mainpage. Put in the NORAD ID  of the satellite you wish to track and click the 'track it' button.
-
-1. Opening up N2Y0 from the homepage will have the ISS already tracked.
-![test](file:///C:/Users/Jackg/Pictures/Screenshots/N2YO%20tracking%20the%20space%20station.png)
-2. 
-
-# Side Projects 
+# Side Projects
 The purpose of the side projects section is to work on possible features of the MOSAIC program for radio astronomy. These projects typically borrow heavily from the geometry engine but lack server communication. Typically these features will be implemented as functions to later be added the geometry engine as a whole or used by other interested parties in their own scripts. 
 
-## Distance from the sun
+## Eclipse_Study
 ### Purpose
 The purpose of this section of the program is to build a graph that will outline the angular distance between a satellite and the sun. The code EclipseStudy.py as standalone will generate a graph with angular distance from the sun and a satellite over the course of a specified day and month. To pick a different satellite put 1 TLE of the databaseGeneratorV1.py format into the text file associated with this repo. To pick a different day one has 2 options. The first is to change the value of the month and day variables at the beginning of ElipseStudy.py, if one chooses this option remember to find the generateDistance() function call and verify it is taking in the day and month values in that order. The second is find the generateDistance() function and change the day and month at the function call. 
 
@@ -320,6 +289,14 @@ def dopplerEffect(number,time,position,fInput):
         return "Error: Satellite not in the sky at this time"
 ```
 
+### Generating Skyfield Time and Position 
+There are a couple of ways to generate a Skyfield time and position but this is a method I've found is the easiest to edit on the fly to dedicate more of my time to actually working one the MOSAIC project. Using the code I put below I recommend generating a general time using pythons date and time function shown here as testtime where I set that testtime to a random time of no significance. Then to make sure this time can later be converted into the skyfields time format it is necesary to set the timezone to UTC. Finally where I set intermediate I recommend changing the values in year, day, month, minute and hour to values of more significance. I don't recommend touching seconds and microseconds as the .at() function from skyfield doesn't differentiate between seconds or lower but I left those values in just incase an interested party wanted to see the whole picture. Finally create a variable with a significant name value and use the ts.from_datetime() skyfield function to turn your intermediate datetime into a skyfield time. To get position is much easier. As I have it written I recommend only changing the latitude and longitude of the wgs84.latlon() function. Here I show how one would make blacksburg in skyfield position format. 
 
-
+```
+# generate a specific time in UTC
+ts = load.timescale()
+testtime = dt.fromisoformat('2011-11-04 00:05:23.283')
+testtime= testtime.replace(tzinfo=utc)      # to fix an existing datetime   
+intermediate = testtime.replace(year = 2024, day = 16, month = 4, minute= 0, hour = 5, second= 0, microsecond=0)
+thisMorning = ts.from_datetime(intermediate)
 
