@@ -72,7 +72,9 @@ The entirety of this project is based around the correct functioning of the skyf
 To verifiy the position of a satellite I recommend using [NY20](https://www.n2yo.com/). This site does real time tracking of satellites including LEO satellites such as the starlink and iridium satellites. This section will outline how to check the position of the international space station, ISS, but it is just as easy to use any other satellite with this method. To use any satellite use the 'find satellite' section in the top right of the mainpage. Put in the NORAD ID  of the satellite you wish to track and click the 'track it' button.
 
 1. Opening up N2Y0 from the homepage will have the ISS already tracked. You should see a section for azimuth and elevation. Make note of the aziumth and elevation as well as the UTC time, this is what we will be referencing to check that skyfield is working.
+
 ![N2YO output](https://github.com/kiarak425/UndergradResearchECE/blob/main/assets/N2YO%20tracking%20the%20space%20station.png)
+
 2. Open up a file with the function dependencies for the positionAtTime() function. If you are unsure of how to do this use skyfield_testing.py file under database_total. This script is designed to have all functions and imports such that it is easy to test that skyfield is working.
 3. Using your favorite debugger of which I recommend VScode's python debugger which is already set up in that directory pause at the output of the positionAtTime() function. Now write the below code. Replace the testtime.replace time with the UTC time you found from N2YO. Here the UTC time is 12:40 on April 22nd. I recommend rounding to the nearst 5 minutes but skyfield has been accurate to the nearest 1 minute in previous tests. Make note of the variable defined on the last line. Here I am using 'thisMorning'.
 ```
