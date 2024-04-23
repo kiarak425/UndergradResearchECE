@@ -1,123 +1,129 @@
-#Skyfield Read File
-# Description: This file parses through the tle file 
-# and gets all of the satellite information
-################################################
-#Importing skyfield and supporting 
-from skyfield.api import load, EarthSatellite, wgs84, Topos
-from geopy.geocoders import Nominatim
+import socket
+import threading
+import serverSupport
+import time
 
-#Function: satelliteParser
-#Returns the information from the tles given in the 
-# database file
-def satelliteParser():
-    #files and opens the file
-    with open('sltrack_iridium.txt', 'r') as file:
-        #reads all lines into a list
-        lines = file.readlines()  
-        satelliteList = []
-
-        
-        for i in range(1, len(lines)):
-            singleSatellite = []
-            #takes each of the lines and gives them a 
-            #corresponding variable
-            temp = lines[i].split(",")
-            name = temp[0].strip()
-            tle1 = temp[1].strip()
-            tle2 = temp[2].strip()
-            NORADid = tle1[2:7]
-            #loads the timescale using the 
-            #official Earth Rotation data
-            singleSatellite.append(name)
-            singleSatellite.append(NORADid)
-            singleSatellite.append(tle1)
-            singleSatellite.append(tle2)
-
-            satelliteList.append(singleSatellite)
-
-    return satelliteList
-
-templist = satelliteParser()
-
-#This function finds the specific satellite by the 
-#Norad Number
-def satelliteFinderID(ID):
-    for element in templist:
-        if(element[1] == ID):
-            return element
-        
-
-#This function gets the latitude and longitude of te satellite
-def latandlongFunction(number):
-    ts = load.timescale()
-    tempsatellite = satelliteFinderID(number)
-    #Gets the satellite data loaded from a tle
-    satellite = EarthSatellite(tempsatellite[2], tempsatellite[3], tempsatellite[0])
-
-    #Gets the current realtime timescale
-    t = ts.now()
-    #Gets the satellite's position
-    geocentric = satellite.at(t)
-    #finds the latitude and longitude of the satellite
-    lat, lon = wgs84.latlon_of(geocentric)
-
-    #prints all the data
-    print('Name:', tempsatellite[0])
-    print('Latitude:', lat)
-    print('Longitude:', lon)
+# Server configuration
+HOST = '0.0.0.0'  # Localhost
+PORT = 3310  # Port to listen on
+START_TIME = time.time() # for server uptime
 
 
-def azimuth(number, lat, long, time):
-    #Loads the time scale
-    t = timeFinder(time)
-    #finds the longitude and latitude of the position
-    position1 = wgs84.latlon(lat, long)
-    #finds the satellite information
-    tempsatellite = satelliteFinderID(number)
-    #sets up the satellite data from the TLE
-    satellite = EarthSatellite(tempsatellite[2], tempsatellite[3], tempsatellite[0])
-    #Finds the difference of the location to the satellite
-    difference = satellite - position1
-    topocentric = difference.at(t)
-    alt, az, distance = topocentric.altaz()
-    #prints out the altitude 
-    print('Altitude: ', alt.degrees)
-    print('Azimuth: ', az.degrees)
-    #print('Distance: {:.1f} km'.format(distance.km))
+# Function to handle client connections
+def handle_client(client_socket, address):
+    print(f"[NEW CONNECTION] {address} connected.")
+    client_socket.send(serverSupport.INSTRUCTION_MANUAL.encode('utf-8'))
 
-#Function which finds the latitude and longitude of a city
-def positionFinder(city):
-    geolocator = Nominatim(user_agent="my_app")
-    location = geolocator.geocode(city)
-    return location.latitude, location.longitude
+    while True:
+        try:
+            # Receive data from the client
+            data = client_socket.recv(1024).decode('utf-8').strip()
+            if not data:
+                break
 
-#Function which finds the time which the enters
-def timeFinder(time):
-    finalTime = time.split()
-    #if user enters now, then the function will print out the current time
-    if finalTime[0] == "now":
-        ts = load.timescale()
-        return ts.now()
-    else:
-        #else the function will print out the time which the user enters
-        ts = load.timescale()
-        t = ts.utc(int(finalTime[0]), int(finalTime[1]), int(finalTime[2]), int(finalTime[3]))
-        return t
+            # Parse client input
+            args = data.split()
+
+            if args[0] == 'mosaic':
+                #if args[1] == 'exit':
+
+                if args[1] == 'ping':
+                    if args[2] == "-s" and len(args) == 4 and (args[3] == f"{HOST}:{PORT}" or args[3] == "hostname"):
+                        uptime_seconds = int(time.time() - START_TIME)
+                        uptime_hours = uptime_seconds // 3600
+                        uptime_minutes = (uptime_seconds % 3600) // 60
+                        uptime_seconds %= 60
+                        uptime_str = f"{uptime_hours} hours, {uptime_minutes} minutes, {uptime_seconds} seconds"
+
+                        # Output: Server uptime
+                        response = f"Server: {HOST}:{PORT} \nServer uptime: {uptime_str}"                        
+                    else:
+                        response = "Invalid arguments"
+
+                elif args[1] == 'satloc':
+                    if len(args) == 12 and args[2] == '-s' and args[4] == '-n' and args[6] == '-t' and args[9] == '-l':
+                        norad_id = args[5]
+                        utcDate = args[7]
+                        utcTime = args[8]
+                        lat = args[10]
+                        long = args[11]
+
+                        if serverSupport.validNoradID(norad_id) and serverSupport.validLocation(lat, long) and serverSupport.validUTC(utcDate, utcTime):
+                            # Output: AZ [deg] EL [deg]
+                                #response from a text file
+                            response = f"AZ deg, EL deg"
+                        else:
+                            response = "Invalid NORAD ID, UTC, or Location"
+                    else:
+                        response = "Invalid arguments for satloc"
+
+                elif args[1] == 'tle':
+                    if len(args) == 6 and args[2] == '-s' and args[4] == '-n':
+                        norad_id = args[5]
+
+                        tle_info = serverSupport.get_tle(norad_id)
+
+                        if tle_info:
+                            response = tle_info
+                        else:
+                            response = f"TLE data not found for NORAD ID: {norad_id}"
+                    else:
+                        response = "Invalid arguments"
+
+                elif args[1] == 'longname':
+                    if len(args) == 6 and args[2] == '-s' and args[4] == '-n':
+                        # Output: <longname>
+                        norad_id = args[5]
+                        response = serverSupport.getLongName(norad_id)
+                    else:
+                        response = "Invalid arguments"
 
 
-#Function to find the next pass -> the next time it passes the specific location
-def nextPass(number, time, lat, long):
-    observer_position = wgs84.latlon(lat, long)
-    tempsatellite = satelliteFinderID(number)
-    # #sets up the satellite data from the TLE
-    satellite = EarthSatellite(tempsatellite[2], tempsatellite[3], tempsatellite[0])
+                elif args[1] == 'nextpass' and len(args) >= 11:
+                    # Output: AZ [deg] max EL [deg] <UTC> at max EL                    
+                    if len(args) == 12 and args[2] == '-s' and args[4] == '-n' and args[6] == '-t' and args[9] == '-l':
+                        norad_id = args[5]
+                        utcDate = args[7]
+                        utcTime = args[8]
+                        lat = args[10]
+                        long = args[11]
 
-    ts = load.timescale()
-    t = ts.now()
-    times, events = satellite.find_events(observer_position, t, t + 1, altitude_degrees=10)
-    for time, event in zip(times, events):
-        print(time)
-        print(event)
+                        if serverSupport.validNoradID(norad_id) and serverSupport.validLocation(lat, long) and serverSupport.validUTC(utcDate, utcTime):
+                            # Output: AZ [deg] EL [deg] <UTC> at max EL
+                                #response from a text file
+                            response = f"AZ deg, EL deg, UTC Max EL"
+                        else:
+                            response = "Invalid NORAD ID, UTC, or Location"
+                    else:
+                        response = "Invalid arguments for nextpass"
 
-if __name__ == "__main__":
-    start_server()
+                else:
+                    response = "Input error"     
+            else:
+                response = "Input error"
+
+            with open('userInput.txt', 'w') as file:
+                for arg in args:
+                    file.write(arg + ' ')
+
+            # Send response to the client
+            client_socket.send(response.encode('utf-8'))
+        except:
+            print(f"[DISCONNECTED] Client {address} disconnected.")
+            break
+
+    client_socket.close()
+
+# Main function to start the server
+def start_server():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((HOST, PORT))
+    server.listen(5)
+    print(f"[LISTENING] Server is listening on {HOST}:{PORT}")
+
+    while True:
+        # Accept incoming connections
+        client_socket, address = server.accept()
+        # Create a new thread to handle the client
+        client_handler = threading.Thread(target=handle_client, args=(client_socket, address))
+        client_handler.start()

@@ -2,7 +2,7 @@ import socket
 import threading
 
 # Server configuration
-HOST = '192.168.0.102' # accessible address of r720
+HOST = '127.0.0.1' # accessible address of r720
 PORT = 3310  # Port to connect to
 
 # Connect to the server

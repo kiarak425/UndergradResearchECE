@@ -24,37 +24,58 @@ def get_next_pass(norad_id, utc_date, utc_time, lat, long):
 
 
 import socket
+# Define host and port
+HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
+PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
-# Server configuration
-HOST = '127.0.0.1'  # Server IP address
-PORT = 3315  # Port to listen on
-TLE_FILE = 'tle_data.txt'  # File containing TLE data
+# Create a socket object
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    # Bind the socket to the address and port
+    s.bind((HOST, PORT))
+    # Listen for incoming connections
+    s.listen()
 
-# Function to handle client requests
-def handle_client(client_socket):
-    # Receive NORAD ID from client
-    norad_id = client_socket.recv(1024).decode('utf-8').strip()
-    
-    # Search for NORAD ID in TLE file
-    with open(TLE_FILE, 'r') as file:
-        tle = get_tle(norad_id)
-        client_socket.send(tle.encode('utf-8'))
-           
-# Main function to start the server
-def start_server():
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind((HOST, PORT))
-    server.listen(1)  # Listen for only one connection at a time
-    print(f"[LISTENING] Server is listening on {HOST}:{PORT}")
+    print(f"Server listening on {HOST}:{PORT}")
 
     while True:
-        # Accept incoming connections
-        client_socket, address = server.accept()
-        print(f"[NEW CONNECTION] Connected to {address[0]}:{address[1]}")
-        
-        # Handle client request in a separate thread
-        handle_client(client_socket)
-        client_socket.close()
+        # Accept incoming connection
+        conn, addr = s.accept()
+        with conn:
+            print('Connected by', addr)
+            while True:
+                # Receive data from the client
+                data = conn.recv(1024)
+                if not data:
+                    break  # If no data received, break the loop
 
-if __name__ == "__main__":
-    start_server()
+                # Decode the received data
+                request = data.decode()
+
+                # Parse the request and call the appropriate function
+                parts = request.split(',')
+                command = parts[0]
+
+                if command == "azimuth_elevation":
+                    norad_id = int(parts[1])
+                    lat = float(parts[2])
+                    long = float(parts[3])
+                    utc_datetime = parts[4]
+                    result = GeometryEngine.get_azimuth_elevation(norad_id, lat, long, utc_datetime)
+                elif command == "tle":
+                    norad_id = int(parts[1])
+                    result = GeometryEngine.get_tle(norad_id)
+                elif command == "name":
+                    norad_id = int(parts[1])
+                    result = GeometryEngine.get_name(norad_id)
+                elif command == "next_pass":
+                    norad_id = int(parts[1])
+                    utc_date = parts[2]
+                    utc_time = parts[3]
+                    lat = float(parts[4])
+                    long = float(parts[5])
+                    result = GeometryEngine.get_next_pass(norad_id, utc_date, utc_time, lat, long)
+                else:
+                    result = "Invalid command"
+
+                # Send the result back to the client
+                conn.sendall(result.encode())
