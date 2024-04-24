@@ -2,8 +2,8 @@ import socket
 import threading
 
 # Server configuration
-HOST = '127.0.0.1' # accessible address of r720
-PORT = 3310  # Port to connect to
+HOST = '127.0.0.1' # Get local machine name
+PORT = 3310                  # Port to connect to
 
 # Connect to the server
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -81,9 +81,11 @@ def azimuth(number, lat, long, time):
     topocentric = difference.at(t)
     alt, az, distance = topocentric.altaz()
     #prints out the altitude 
-    print('Altitude: ', alt.degrees)
-    print('Azimuth: ', az.degrees)
+    # print('Altitude: ', alt.degrees)
+    # print('Azimuth: ', az.degrees)
     #print('Distance: {:.1f} km'.format(distance.km))
+    output = f"Altitude: {alt.degrees}\nAzimuth: {az.degrees}"
+    return output
 
 #Function which finds the latitude and longitude of a city
 def positionFinder(city):

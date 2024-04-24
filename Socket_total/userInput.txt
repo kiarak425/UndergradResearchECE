@@ -1,1 +1,1 @@
-mosaic tle -s hostname -n 43570 
+mosaic longname -s hotname -n 43478 

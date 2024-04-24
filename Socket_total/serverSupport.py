@@ -106,36 +106,3 @@ def getLongName(norad_id):
                 return longname
 
     return "Longname not found"
-
-
-
-
-# tcp for information communication
-import socket
-
-HOST2 = '127.0.0.1'  # Server IP address
-PORT2 = 1335  # Port to connect to
-
-# Function to send NORAD ID to server and receive TLE information
-def get_tle(norad_id):
-    try:
-        # Establish connection to server
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-            client_socket.connect((HOST2, PORT2))
-            
-            # Send NORAD ID to server
-            client_socket.send(norad_id.encode('utf-8'))
-            
-            # Receive TLE information from server
-            tle_info = client_socket.recv(1024).decode('utf-8')
-            
-            return tle_info
-    except Exception as e:
-        return str(e)
-    
-# if __name__ == "__main__":
-#     # Example usage:
-#     norad_id = input("Enter NORAD ID: ")
-    # tle_data = get_tle(norad_id)
-#     print("TLE Information:")
-#     print(tle_data)

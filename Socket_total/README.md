@@ -4,7 +4,7 @@ Mosaic is a command-line tool designed for various satellite tracking operations
 
 
 
-> To operate Mosaic, ensure that the `server.py` file is activated first. This server runs on port 3310, on the IP specified in `client.py`. Alter the IP Address in `client.py` to the address for which the `server.py` is hosted. Once the server is running, clients can be started using the `client.py` file. Multiple clients can run simultaneously, allowing for efficient satellite tracking and information retrieval.
+> To operate Mosaic, ensure that the `server.py` file is activated first. This server runs on localhost port 3310 (127.0.0.1:3310). Once the server is running, clients can be started using the `client.py` file. Multiple clients can run simultaneously, allowing for efficient satellite tracking and information retrieval.
 
 
 ## Required Arguments
@@ -22,7 +22,7 @@ Mosaic is a command-line tool designed for various satellite tracking operations
   - `tle`
   - `longname`
   - `nextpass`
-- `-s <SERVER>`: Specify the server. Using "hostname" works as well.
+- `-s <SERVER>`: Specify the server.
 - `-n <NORAD-ID>`: Specify the NORAD ID of the satellite.
 - `-t <UTC>`: Specify the Coordinated Universal Time (UTC).
   - `MM-DD-YYYY HH:MM:SS`
