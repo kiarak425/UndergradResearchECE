@@ -42,34 +42,29 @@ def handle_client(client_socket, address):
                         response = "Invalid arguments"
                         
                 elif args[1] == 'satloc':
-                    if args[2] == '-s' and args[4] == '-n':# and args[6] == '-t' and args[9] == '-l':
+                    if len(args) == 12 and args[2] == '-s' and args[4] == '-n' and args[6] == '-t' and args[9] == '-l':
                         norad_id = args[5]
-                        if (arg[7] == "now"):
-                            utc_datetime = "now"
-                            lat = args[9]
-                            long = args[10]
-                        else:
-                            utc_datetime = args[7] + " " + args[8]
-                            lat = args[10]
-                            long = args[11]
-                        
-                            response = str(geoTCP.send_request_to_server(norad_id, lat, long, utc_datetime))
-                            print(response)
+                        utcDate = args[7]
+                        utcTime = args[8]
+                        lat = args[10]
+                        long = args[11]
 
-                    #     if serverSupport.validNoradID(norad_id) and serverSupport.validLocation(lat, long) and serverSupport.validUTC(utcDate, utcTime):
-                    #         # Output: AZ [deg] EL [deg]
-                    #             #response from a text file
-                    #         #response = f"AZ deg, EL deg"
-                    #     else:
-                    #         response = "Invalid NORAD ID, UTC, or Location"
-                    # else:
-                    #     response = "Invalid arguments for satloc"
+                        if serverSupport.validNoradID(norad_id) and serverSupport.validLocation(lat, long) and serverSupport.validUTC(utcDate, utcTime):
+                            # Output: AZ [deg] EL [deg]
+                                #response from a text file
+                            response = f"AZ deg, EL deg"
+                        else:
+                            response = "Invalid NORAD ID, UTC, or Location"
+                    else:
+                        response = "Invalid arguments for satloc"
                     
                 elif args[1] == 'tle':
                     if len(args) == 6 and args[2] == '-s' and args[4] == '-n':
                         # Output: <TLE>
                             # output the tle from a file according to noradID                        
                         response = "<TLE>"
+                    else:
+                        response = "Invalid arguments"
                         
                 elif args[1] == 'longname':
                     if len(args) == 6 and args[2] == '-s' and args[4] == '-n':

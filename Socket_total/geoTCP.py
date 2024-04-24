@@ -1,8 +1,8 @@
 import socket
 
-def send_request(request_type, request_data, host='127.0.0.1', port=65432):
+def send_request(request_type, request_data, h='127.0.0.1', p=65432):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((host, port))
+        s.connect((h, p))
         # Combine request type and data into a single string
         request_str = ','.join([request_type] + request_data)
         s.sendall(request_str.encode('utf-8'))

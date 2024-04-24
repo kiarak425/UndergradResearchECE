@@ -1,1 +1,1 @@
-e 
+mosaic satloc -s hostname -n 43577 
