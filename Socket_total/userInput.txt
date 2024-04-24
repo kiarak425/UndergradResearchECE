@@ -1,1 +1,1 @@
-mosaic longname -s hotname -n 43478 
+e 

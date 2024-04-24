@@ -2,7 +2,7 @@ import socket
 import threading
 
 # Server configuration
-HOST = '127.0.0.1' # Get local machine name
+HOST = '172.29.237.149' # Get local machine name
 PORT = 3310                  # Port to connect to
 
 # Connect to the server
