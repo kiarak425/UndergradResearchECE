@@ -6,14 +6,6 @@ This part of the project is meant to get the most accurate and most recent data 
 
 This is an edited copy of example code on SpaceTrack.org to work with the SWIFT-UDP project
 
-there is a couple of important elements such as the configuration file with Jackson's SpaceTrack.org login information but any login information should work as long as the configuration file is updated. **NOTE**: if you want to edit this code for your own purposes I'd ask that you use your own login information to Space-Track.org. 
-
-The current login is
-
-username: ajackson03@vt.edu
-
-Password: Swift-UDP1234567
-
 There is a text file that the python script writes to. The file is temporary and is wiped after every loop of the main program. The file always starts with the date and time the file was generated. The lines of the TLE are all on one line (despite the name) and each line is separated with a comma. I have attached a sample TLE below for reference. There are a few notable elements useful for parsing. First every TLE in this file will start with a 0 then the first line of the TLE. Next each line of the TLE after the first starts with a comma then a 1 or 2 depending on which line of the TLE it is. Next notice that the NORAD ID, bolded, always ends with it's classification as a letter. This satellite is unclassified and therefore has a U after it's NORAD ID. The element just after the NORAD ID is the international identifier and also ends with a letter.
 
 0 IRIDIUM 109,1 **41919U** 17003C   24055.16914585  .00000180  00000-0  57273-4 0  9997,2 41919  86.3912  81.2083 0002093  86.2157 273.9278 14.34216678372248
