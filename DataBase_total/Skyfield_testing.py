@@ -99,13 +99,12 @@ testtime= testtime.replace(tzinfo=utc)      # to fix an existing datetime
 intermediate = testtime.replace(year = 2024, day = 22, month = 4, minute= 0, hour = 12, second= 0, microsecond=0)
 thisMorning = ts.from_datetime(intermediate)
 
-# generate a specific location
-blacksburg = wgs84.latlon(37.2296 * N, 80.4139 * W)
-
 # x = positionAtTime("25544",thisMorning, blacksburg)
 planets = load('de421.bsp')  # ephemeris DE421
 sun = planets['sun']
 earth = planets['Earth']
+
+blacksburg = wgs84.latlon(37.2296 * N, 80.4139 * W)
 goeblacksburg = earth+ wgs84.latlon(37.2296 * N, 80.4139 * W)
 
 x = goeblacksburg.at(thisMorning).observe(sun)
