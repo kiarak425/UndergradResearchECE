@@ -3,14 +3,22 @@ from skyfield.iokit import parse_tle_file
 from datetime import datetime as dt
 import numpy as np
 from matplotlib import pyplot as plt
+import configparser
 
-month = 4
-day = 3
+
+config = configparser.ConfigParser()
+config.read("./EclipseStudy.ini")
+month = int(config.get("configuration","startDateMonth"))
+day = int(config.get("configuration","startDateDay"))
+oneDayTrack = bool(config.get("configuration","oneDay"))
+daysElapsed = int(config.get("configuration","daysToTrack"))
+latidude = bool(config.get("configuration","oneDay"))
+longitude = int(config.get("configuration","daysToTrack"))
 
 
 def satelliteParser():
     #files and opens the file
-    with open('sltrack_iridium_perm_small.txt', 'r') as file:
+    with open('EclipseStudy.txt', 'r') as file:
         #reads all lines into a list
         lines = file.readlines()  
         satelliteList = []
@@ -87,34 +95,34 @@ def latandlongFunction(number):
 def generateDistance(day, month, SatelliteID):
     testtime = dt.fromisoformat('2011-11-04 00:05:23.283')
     testtime= testtime.replace(tzinfo=utc)      # to fix an existing datetime   
-    out = [0]*1440
-    for x in range(0,24):
-    # edits the generic time with int values
-        for y in range(0,60):
-            realTime = testtime.replace(year = 2024, day = day, month = month, minute= y, hour = x, second= 0, microsecond=0)
+    out = [0]*1440*daysElapsed
+    for days in range(0,daysElapsed):
+        for hours in range(0,24):
+            for minutes in range(0,60):
+                realTime = testtime.replace(year = 2024, day = day+days, month = month, minute= minutes, hour = hours, second= 0, microsecond=0)
 
-            t = ts.from_datetime(realTime)
+                t = ts.from_datetime(realTime)
 
-            # gets the distance vector for a satellite
-            postemp = positionAtTime(SatelliteID,t,blacksburg)
-            pos1 = [np.sin(np.pi/2-postemp[0])*np.cos(postemp[1]),np.sin(np.pi/2-postemp[0])*np.sin(postemp[1]),np.cos(np.pi/2-postemp[0])]        
+                # gets the distance vector for a satellite
+                postemp = positionAtTime(SatelliteID,t,location)
+                # pos1 = [np.sin(np.pi/2-postemp[0])*np.cos(postemp[1]),np.sin(np.pi/2-postemp[0])*np.sin(postemp[1]),np.cos(np.pi/2-postemp[0])]        
 
-            goeblacksburg = earth+ wgs84.latlon(37.2296 * N, 80.4139 * W)
-            astrometric = goeblacksburg.at(t).observe(sun)
-            alt, az, d = astrometric.apparent().altaz()
-            pos2 = [np.sin(np.pi/2-alt.radians)*np.cos(az.radians),np.sin(np.pi/2-alt.radians)*np.sin(az.radians),np.cos(np.pi/2-alt.radians)]
-    
+                locationGEO = earth+ wgs84.latlon(latidude * N, longitude * W)
+                astrometric = locationGEO.at(t).observe(sun)
+                alt, az, d = astrometric.apparent().altaz()
+                # pos2 = [np.sin(np.pi/2-alt.radians)*np.cos(az.radians),np.sin(np.pi/2-alt.radians)*np.sin(az.radians),np.cos(np.pi/2-alt.radians)]
+        
 
-            deltaA = (postemp[1]-az.radians)*np.cos(postemp[0])
-            deltaB = postemp[1]-alt.radians
-            out[x*60+y] = (180/np.pi)*(np.arccos(np.sin(alt.radians)*np.sin(postemp[1])+np.cos(alt.radians)*np.cos(postemp[1])*np.cos(az.radians-postemp[0])))
+                # deltaA = (postemp[1]-az.radians)*np.cos(postemp[0])
+                # deltaB = postemp[1]-alt.radians
+                out[hours*60+minutes+1440*days] = (180/np.pi)*(np.arccos(np.sin(alt.radians)*np.sin(postemp[1])+np.cos(alt.radians)*np.cos(postemp[1])*np.cos(az.radians-postemp[0])))
     return out
 
 ts = load.timescale()
 planets = load('de421.bsp')  # ephemeris DE421
 sun = planets['sun']
 earth = planets['Earth']
-blacksburg = wgs84.latlon(37.2296 * N, 80.4139 * W)
+location = wgs84.latlon(latidude * N, longitude * W)
 
 out = generateDistance(day,month,SatelliteID)
 
@@ -122,15 +130,14 @@ out = generateDistance(day,month,SatelliteID)
 figure, axes = plt.subplots()
 monthstr = str(month)
 daystr = str(day)
-a = templist[0]
-b = a[0]
+satelliteName = temp[0]
 
-b= b.replace("0", " ")
-b= b.strip()
-plt.title("distance " +b+ " from sun on " + monthstr + '/' + daystr)
+satelliteName= satelliteName.replace("0", " ")
+satelliteName= satelliteName.strip()
+plt.title("distance " +satelliteName+ " from sun on " + monthstr + '/' + daystr)
 plt.xlabel("minutes in a day")
 plt.ylabel("angular separation (deg)")
-x = np.arange(1440)
-plt.plot(x,out,'o',color = 'blue')
+x = np.arange(1440*daysElapsed)
+plt.plot(x,out,'.',color = 'blue')
 plt.ylim(0,180)
 plt.show()
