@@ -10,10 +10,22 @@ config = configparser.ConfigParser()
 config.read("./EclipseStudy.ini")
 month = int(config.get("configuration","startDateMonth"))
 day = int(config.get("configuration","startDateDay"))
+year = int(config.get("configuration","startDateYear"))
 oneDayTrack = bool(config.get("configuration","oneDay"))
 daysElapsed = int(config.get("configuration","daysToTrack"))
 latidude = bool(config.get("configuration","oneDay"))
 longitude = int(config.get("configuration","daysToTrack"))
+
+monthPool = 0
+if(month == 4 or month == 6 or month == 9 or month == 11):
+    monthPool = 1
+elif(month == 2):
+    if((year%4)==0):
+        monthPool = 2
+    else:
+        monthPool = 3
+
+
 
 
 def satelliteParser():
@@ -96,10 +108,15 @@ def generateDistance(day, month, SatelliteID):
     testtime = dt.fromisoformat('2011-11-04 00:05:23.283')
     testtime= testtime.replace(tzinfo=utc)      # to fix an existing datetime   
     out = [0]*1440*daysElapsed
+    daysOffset = 0
     for days in range(0,daysElapsed):
+        if((days+day)>(31-monthPool)):
+            month = month + 1
+            daysOffset = 31-monthPool
         for hours in range(0,24):
             for minutes in range(0,60):
-                realTime = testtime.replace(year = 2024, day = day+days, month = month, minute= minutes, hour = hours, second= 0, microsecond=0)
+                test = day + days - daysOffset
+                realTime = testtime.replace(year = 2024, day = day+days-daysOffset, month = month, minute= minutes, hour = hours, second= 0, microsecond=0)
 
                 t = ts.from_datetime(realTime)
                 # alt, az of satellite
