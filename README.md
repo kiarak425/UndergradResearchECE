@@ -1,6 +1,11 @@
 # MOSAIC
+# Table of contents
+1. [Database](#Database)
+2. [Some paragraph](#paragraph1)
+    1. [Sub paragraph](#subparagraph1)
+3. [Another paragraph](#paragraph2)
 
-## Database
+## Database <a name="Database"></a>
 
 This part of the project is meant to get the most accurate and most recent data from SpaceTrack.org 
 
