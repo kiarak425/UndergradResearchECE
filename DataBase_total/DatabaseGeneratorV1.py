@@ -46,16 +46,13 @@ class MyError(Exception):
 uriBase                = "https://www.space-track.org"
 requestLogin           = "/ajaxauth/login"
 requestCmdAction       = "/basicspacedata/query" 
-<<<<<<< Updated upstream
 requestFindIridiums   = "/class/gp/GP_ID/%3E/OBJECT_TYPE/payload/orderby/GP_ID%20desc/format/json/OBJECT_NAME/iridium~~/"
 requestOMMIridium1    = "/class/omm/NORAD_CAT_ID/"
 requestOMMIridium2    = "/orderby/EPOCH%20desc/limit/1/emptyresult/show"
-=======
 requestFindIridiums    = "/class/gp/GP_ID/%3E/OBJECT_TYPE/payload/orderby/GP_ID%20desc/format/json/OBJECT_NAME/iridium~~/"
 requestFindStarlinks   = "/class/gp/GP_ID/%3E/OBJECT_TYPE/payload/orderby/GP_ID%20desc/format/json/OBJECT_NAME/starlink~~/"
 requestOMMStarlink1    = "/class/omm/NORAD_CAT_ID/"
 requestOMMStarlink2    = "/orderby/EPOCH%20desc/limit/1/emptyresult/show"
->>>>>>> Stashed changes
 
 timeToWaitSeconds = 43200
 prompt = str(timeToWaitSeconds)
