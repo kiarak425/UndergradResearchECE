@@ -1,7 +1,7 @@
 # MOSAIC
 # Table of contents
 1. [Database](#Database)
-2. [Some paragraph](#paragraph1)
+2. [Geometry Engine](#geometryEngine)
     1. [Sub paragraph](#subparagraph1)
 3. [Another paragraph](#paragraph2)
 
@@ -38,7 +38,7 @@ There are a couple TODOs ranked in order of most important
 
 ! have way to respond to server for on demand pull with TLE. Currently the program just prints the TLE to a text file. 
 
-## Geometry Engine
+## Geometry Engine <a name="geometryEngine"></a>
 
 The Geometry Engine is meant to parse through the TLE file in the Database Engine Repository. Furthermore, this iterates throughout the TLE files to get the most recent data and be able to create a list of satellite information.
 
