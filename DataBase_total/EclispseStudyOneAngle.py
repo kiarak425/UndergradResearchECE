@@ -8,11 +8,11 @@ import configparser
 
 config = configparser.ConfigParser()
 config.read("./EclipseStudy.ini")
-month = int(config.get("configuration","startDateMonth"))
-day = int(config.get("configuration","startDateDay"))
-year = int(config.get("configuration","startDateYear"))
-oneDayTrack = bool(config.get("configuration","oneDay"))
-daysElapsed = int(config.get("configuration","daysToTrack"))
+month = 6
+day = 1
+year = 2024
+# oneDayTrack = bool(config.get("configuration","oneDay"))
+# daysElapsed = int(config.get("configuration","daysToTrack"))
 latidude = float(config.get("configuration","latitude"))
 longitude = float(config.get("configuration","longitude"))
 
@@ -94,38 +94,26 @@ def latandlongFunction(number):
 
 
 def generateDistance(day, month, year, SatelliteID):
-    monthPool = 0
-    if(month == 4 or month == 6 or month == 9 or month == 11):
-        monthPool = 1
-    elif(month == 2):
-        if((year%4)==0):
-            monthPool = 2
-        else:
-            monthPool = 3
     testtime = dt.fromisoformat('2011-11-04 00:05:23.283')
     testtime= testtime.replace(tzinfo=utc)      # to fix an existing datetime   
-    out = [0]*1440*daysElapsed
     daysOffset = 0
-    for days in range(0,daysElapsed):
-        if((days+day)>(31-monthPool)):
-            month = month + 1
-            daysOffset = 31-monthPool
-        for hours in range(0,24):
-            for minutes in range(0,60):
-                test = day + days - daysOffset
-                realTime = testtime.replace(year = 2024, day = day+days-daysOffset, month = month, minute= minutes, hour = hours, second= 0, microsecond=0)
 
-                t = ts.from_datetime(realTime)
-                # alt, az of satellite
-                postemp = positionAtTime(SatelliteID,t,location)
+    realTime = testtime.replace(year = 2024, day = 1, month = 6, minute= 0, hour = 16, second= 0, microsecond=0)
 
-                # alt, az of sun
-                locationGEO = earth+ wgs84.latlon(latidude * N, longitude * W)
-                astrometric = locationGEO.at(t).observe(sun)
-                alt, az, d = astrometric.apparent().altaz()
+    t = ts.from_datetime(realTime)
+    # alt, az of satellite
+    postemp = positionAtTime(SatelliteID,t,location)
+    # postemp[1] = postemp[1] * (180/np.pi)
+    # postemp[0] = postemp[0] * (180/np.pi)
 
-                out[hours*60+minutes+1440*days] = (180/np.pi)*(np.arccos(np.sin(alt.radians)*np.sin(postemp[0])+np.cos(alt.radians)*np.cos(postemp[0])*np.cos(az.radians-postemp[1])))
+    # alt, az of sun
+    locationGEO = earth+ wgs84.latlon(latidude * N, longitude * W)
+    astrometric = locationGEO.at(t).observe(sun)
+    alt, az, d = astrometric.apparent().altaz()
+
+    out = (180/np.pi)*(np.arccos(np.sin(alt.radians)*np.sin(postemp[0])+np.cos(alt.radians)*np.cos(postemp[0])*np.cos(az.radians-postemp[1])))
     return out
+
 
 ts = load.timescale()
 planets = load('de421.bsp')  # ephemeris DE421
@@ -135,18 +123,18 @@ location = wgs84.latlon(latidude * N, longitude * W)
 
 out = generateDistance(day,month,year, SatelliteID)
 
-# print(out)
-figure, axes = plt.subplots()
-monthstr = str(month)
-daystr = str(day)
-satelliteName = temp[0]
+print(out)
+# figure, axes = plt.subplots()
+# monthstr = str(month)
+# daystr = str(day)
+# satelliteName = temp[0]
 
-satelliteName= satelliteName.replace("0", " ")
-satelliteName= satelliteName.strip()
-plt.title("distance " +satelliteName+ " from sun on " + monthstr + '/' + daystr)
-plt.xlabel("minutes in a day")
-plt.ylabel("angular separation (deg)")
-x = np.arange(1440*daysElapsed)
-plt.plot(x,out,'.',color = 'blue')
-plt.ylim(0,180)
-plt.show()
+# satelliteName= satelliteName.replace("0", " ")
+# satelliteName= satelliteName.strip()
+# plt.title("distance " +satelliteName+ " from sun on " + monthstr + '/' + daystr)
+# plt.xlabel("minutes in a day")
+# plt.ylabel("angular separation (deg)")
+# x = np.arange(1440*daysElapsed)
+# plt.plot(x,out,'.',color = 'blue')
+# plt.ylim(0,180)
+# plt.show()
