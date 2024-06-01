@@ -1,6 +1,17 @@
 # MOSAIC
+# Table of contents
+1. [Database](#Database)
+2. [Geometry Engine](#geometryEngine)
+3. [Socket](#socket)
+4. [How Tos](#howTos)
+    1. [Generate Time and Position](#genTimeNPos)
+    2. [Verifying the position of a satellite](#satellite)
+    3. [Verifying the position of the sun](#sun)
+5. [Side Projects](#sideProjects)
+    1. [Distance from the sun](#distFromSun)
+    2. [Doppler Effect Calculator](#doppler)
 
-## Database
+## Database <a name="Database"></a>
 
 This part of the project is meant to get the most accurate and most recent data from SpaceTrack.org 
 
@@ -33,16 +44,16 @@ There are a couple TODOs ranked in order of most important
 
 ! have way to respond to server for on demand pull with TLE. Currently the program just prints the TLE to a text file. 
 
-## Geometry Engine
+## Geometry Engine <a name="geometryEngine"></a>
 
 The Geometry Engine is meant to parse through the TLE file in the Database Engine Repository. Furthermore, this iterates throughout the TLE files to get the most recent data and be able to create a list of satellite information.
 
-## Socket
+## Socket <a name="socket"></a>
 
 This socket is a command-line tool designed for various satellite tracking operations. It provides the ability to perform tasks such as checking server status, locating satellites, retrieving TLEs (Two-Line Element) data, obtaining long names of satellites, and predicting the next pass of a satellite. This code is paired with a Geometry Engine and a Back-End Database.
 
-# "How to"s
-## Generating Skyfield Time and Position 
+# "How to"s <a name="howTos"></a>
+## Generating Skyfield Time and Position  <a name="genTimeNPos"></a>
 There are a couple of ways to generate a Skyfield time and position but this is a method I've found is the easiest to edit on the fly to dedicate more of my time to actually working one the MOSAIC project. Using the code I put below I recommend generating a general time using pythons date and time function shown here as testtime where I set that testtime to a random time of no significance. Then to make sure this time can later be converted into the skyfields time format it is necesary to set the timezone to UTC. Finally where I set intermediate I recommend changing the values in year, day, month, minute and hour to values of more significance. I don't recommend touching seconds and microseconds as the .at() function from skyfield doesn't differentiate between seconds or lower but I left those values in just incase an interested party wanted to see the whole picture. Finally create a variable with a significant name value and use the ts.from_datetime() skyfield function to turn your intermediate datetime into a skyfield time. To get position is much easier. As I have it written I recommend only changing the latitude and longitude of the wgs84.latlon() function. Here I show how one would make blacksburg in skyfield position format. 
 
 ```
@@ -57,10 +68,10 @@ thisMorning = ts.from_datetime(intermediate)
 blacksburg = wgs84.latlon(37.2296 * N, 80.4139 * W)
 ```
 
-## Verifying skyfield is working 
+## Verifying skyfield is working <a name="verifying"></a>
 The entirety of this project is based around the correct functioning of the skyfield library and the accuracy of the TLEs gained from [space-track](https://www.space-track.org/documentation). To verify the system is working there are a number of sites that do real time tracking of celestial objects. We can use these sites to check the accuracy of our program by setting the time to as close to the current time and seeing if the site and program agrees. This section details completing this check for a satellite and the sun. 
 
-### Verifying the position of a satellite
+### Verifying the position of a satellite <a name="satellite"></a>
 To verifiy the position of a satellite I recommend using [NY20](https://www.n2yo.com/). This site does real time tracking of satellites including LEO satellites such as the starlink and iridium satellites. This section will outline how to check the position of the international space station, ISS, but it is just as easy to use any other satellite with this method. To use any satellite use the 'find satellite' section in the top right of the mainpage. Put in the NORAD ID  of the satellite you wish to track and click the 'track it' button.
 
 1. Opening up N2Y0 from the homepage will have the ISS already tracked. You should see a section for azimuth and elevation. Make note of the aziumth and elevation as well as the UTC time, this is what we will be referencing to check that skyfield is working.
@@ -90,7 +101,7 @@ x = positionAtTime("25544",thisMorning, blacksburg)
 
 ![skyfield output](https://github.com/kiarak425/UndergradResearchECE/blob/main/assets/skyfieldTrackingSpaceStation.png)
 
-### Verifying the position of the sun
+### Verifying the position of the sun <a name="sun"></a>
 There are 2 different ways to get the position of the sun in real time. The first is to go outside and physically measure the azimuth and elevation of that "big glowing thing in the sky" with a compass and protractor. The second best way is with [suncalc](https://www.suncalc.org/#/37.2258,-80.4101,12/2024.04.22/08:01/1/3). Here I've linked the sun calc position of blacksburg on April 22nd.
 1. To start I'd recommend finding your location on suncalc. From there take note of the time you wish to verify with skyfield. In this case I chose 8am. Suncalc doesn't give UTC dates but in the same place as finding the time it tells you the difference from UTC the location you input is. In my case Blacksburg is UTC-4 so I would add 4 to the time in skyfield to get accurate position data of the sun. Make note of the time in UTC you wish to compare. Below I put a picture of the output of suncalc.
 
@@ -125,14 +136,17 @@ alt, az, d = x.apparent().altaz()
  
 
 
-# Side Projects 
+# Side Projects <a name="sideProjects"></a>
 The purpose of the side projects section is to work on possible features of the MOSAIC program for radio astronomy. These projects typically borrow heavily from the geometry engine but lack server communication. Typically these features will be implemented as functions to later be added the geometry engine as a whole or used by other interested parties in their own scripts. 
 
-## Distance from the sun
-### Purpose
+## Distance from the sun <a name="distFromSun"></a>
+### Purpose <a name="distFromSunPurpose"></a>
 The purpose of this section of the program is to build a graph that will outline the angular distance between a satellite and the sun. The code EclipseStudy.py as standalone will generate a graph with angular distance from the sun and a satellite over the course of a specified day and month. To pick a different satellite put 1 TLE of the databaseGeneratorV1.py format into the text file associated with this repo. To pick a different day one has 2 options. The first is to change the value of the month and day variables at the beginning of ElipseStudy.py, if one chooses this option remember to find the generateDistance() function call and verify it is taking in the day and month values in that order. The second is find the generateDistance() function and change the day and month at the function call. 
 
-## Using this Program/Function
+### How this works <a name="distFromSunHow"></a>
+The way angular distance is calculated in this scenario is using the [angular distance forumla](https://en.wikipedia.org/wiki/Angular_distance). Using the at() function on skyfield we get the azimuth and elevation of the object in question. In the terms of the angular distance formula we get the alpha and delta in that order. I used the most accurate formula since I didn't see a reason to not be as accurate as possible and in some cases it would be possible for such assumptions to not be valid. We have already confirmed that the azimuth and elevation of an object in the sky is accurate when tracked by skyfield. For more on that topic see the section **Verifying skyfield is working**.
+
+### Using this Program/Function <a name="distFromSunUse"></a>
 To make this study more useful to the MOSAIC team as a whole the working part of this study has been made into a function which can easily be copied and pasted into the geometry engine or any other interested parties program. The name of this function is generateDistance(). The inputs of this function are day, month and satelliteID in that order. day and month are integers, satelliteID is a string with the NORAD ID of the satellite in question. To make sure this works copy lines 11-47 as written. The reason for this is that satelliteParser() depends on a value generated by a function call of satelliteParser() as does generateDistance(). The code will not work if the text file that satelliteParser() expects to read from isn't in the same folder as script calling the function. In EclipseStudy.py the text file is sltrack_iridium_perm_small.txt. The function returns a 1 by 1440 array with the angular distances of the satellite in question over the course of a day starting at 12am and ending at 11:59pm with each point represening a minute from the last position. This function does _not_ graph the output but if one wishes to graph the output that is done at the end of the ElcipseStudy.py program. 
 
 | Input Name | Format | Description |
@@ -141,7 +155,7 @@ To make this study more useful to the MOSAIC team as a whole the working part of
 | month | number (int works best) | Month of interest |
 | Satellite ID | string | NORAD ID of the satellite of interest |
 
-### Library Dependencies
+### Library Dependencies <a name="distFromSunLibrary"></a>
 If one wishes just to copy the function generateDistance() one needs the python libraries outlined below. One is able to copy these dependcies as written in this readme for ease of use. 
 ```
   from skyfield.api import load, wgs84, EarthSatellite, N, W,utc
@@ -150,7 +164,7 @@ If one wishes just to copy the function generateDistance() one needs the python 
   import numpy as np
   from matplotlib import pyplot as plt
 ```
-### Function Dependencies
+### Function Dependencies <a name="distFromSunFunctions"></a>
 If one wishes just to copy the function generateDistance() one needs the functions from other parts of the MOSAIC organization outlined below. These functions also appear in the EclipseStudy.py program. Please see the section on using this program/function for more details on how to copy these functions into your code. 
 
   - satelliteParser()  -  note: this means that the code works with TLEs generated by the databaseGeneratorV1.py script
@@ -218,40 +232,49 @@ def positionAtTime(number,time,position):
     # print('Distance: {:.1f} km'.format(distance.km))
     return [alt.radians, az.radians]
 ```
-### Function as written
+### Function as written <a name="distFromSunAsWritten"></a>
 For ease of use I have copied the generateDistance() function below for quick analysis by interested parties.
 
 ```
-def generateDistance(day, month, SatelliteID):
+def generateDistance(day, month, year, SatelliteID):
+    monthPool = 0
+    if(month == 4 or month == 6 or month == 9 or month == 11):
+        monthPool = 1
+    elif(month == 2):
+        if((year%4)==0):
+            monthPool = 2
+        else:
+            monthPool = 3
     testtime = dt.fromisoformat('2011-11-04 00:05:23.283')
     testtime= testtime.replace(tzinfo=utc)      # to fix an existing datetime   
-    out = [0]*1440
-    for x in range(0,24):
-        for y in range(0,60):
-            realTime = testtime.replace(year = 2024, day = day, month = month, minute= y, hour = x, second= 0, microsecond=0)
+    out = [0]*1440*daysElapsed
+    daysOffset = 0
+    for days in range(0,daysElapsed):
+        if((days+day)>(31-monthPool)):
+            month = month + 1
+            daysOffset = 31-monthPool
+        for hours in range(0,24):
+            for minutes in range(0,60):
+                test = day + days - daysOffset
+                realTime = testtime.replace(year = 2024, day = day+days-daysOffset, month = month, minute= minutes, hour = hours, second= 0, microsecond=0)
 
-            t = ts.from_datetime(realTime)
+                t = ts.from_datetime(realTime)
+                # alt, az of satellite
+                postemp = positionAtTime(SatelliteID,t,location)
 
-            # gets the distance vector for a satellite
-            postemp = positionAtTime(SatelliteID,t,blacksburg)
-            pos1 = [np.sin(np.pi/2-postemp[0])*np.cos(postemp[1]),np.sin(np.pi/2-postemp[0])*np.sin(postemp[1]),np.cos(np.pi/2-postemp[0])]        
+                # alt, az of sun
+                locationGEO = earth+ wgs84.latlon(latidude * N, longitude * W)
+                astrometric = locationGEO.at(t).observe(sun)
+                alt, az, d = astrometric.apparent().altaz()
 
-            goeblacksburg = earth+ wgs84.latlon(37.2296 * N, 80.4139 * W)
-            astrometric = goeblacksburg.at(t).observe(sun)
-            alt, az, d = astrometric.apparent().altaz()
-            pos2 = [np.sin(np.pi/2-alt.radians)*np.cos(az.radians),np.sin(np.pi/2-alt.radians)*np.sin(az.radians),np.cos(np.pi/2-alt.radians)]
-    
-
-            deltaA = (postemp[1]-az.radians)*np.cos(postemp[0])
-            deltaB = postemp[1]-alt.radians
-            out[x*60+y] = (180/np.pi)*(np.arccos(np.sin(alt.radians)*np.sin(postemp[1])+np.cos(alt.radians)*np.cos(postemp[1])*np.cos(az.radians-postemp[0])))
+                out[hours*60+minutes+1440*days] = (180/np.pi)*(np.arccos(np.sin(alt.radians)*np.sin(postemp[1])+np.cos(alt.radians)*np.cos(postemp[1])*np.cos(az.radians-postemp[0])))
     return out
 ```
-## Doppler Effect Calculator
-### Purpose
+## Doppler Effect Calculator <a name="doppler"></a>
+### Purpose <a name="dopplerPurpose"></a>
 The purpose of this section of the program is to build a function able to calculate the doppler shifted frequency of a satellite given that satelliltes frequency. The program dopplerEffect.py as standalone will print to the termincal the doppler shifted frequency of the object of interest given a frequency. This is done by using a new function designed specifically for the purpose of getting the velocity of satellites relative to an oberserver. This function appears in function dependencies of this function. 
 
-### Using this as a function/program
+### Using this as a function/program <a name="dopplerUse"></a>
 To make this study more useful to the MOSAIC team as a whole the working part of this study has been made into a function which can easily be copied and pasted into the geometry engine or any other interested parties program. The name of this function is dopplerEffect(). The inputs of this function are number, time, position and fInput in that order. To make sure this works copy the code appearing in function dependencies of this section. The code will not work if the text file that satelliteParser() expects to read from isn't in the same folder as script calling the function. In dopperEffect.py the text file is sltrack_iridium_perm_small.txt. Later in this section there is a description of how to generate a skyfield time format as well as a skyfield position format. Using the function as a standalone program there are a few things one must keep in mind. First is to generate a TLE of the database generator format and copy that TLE into the same .txt file your satelliteParser() function expects. Next review the section on generating a skyfield time and position format. Finally change the last input of the dopplerEffect() call to the function of the object you are trying to observe. The output of the dopplerEffect() function isn't consistent for a reason. If the satellite is in the sky the dopplerEffect() function will output the doppler shifted frequency of the satellite as observed from the ground. The function will output a string detailing an error if the satellite isn't in the sky. I recommend printing the output of this function as is but if one needs an error value such as -1 the last line of the dopplerEffect() function can be easily edited to ouptut -1.
 
 | Input Name | Format | Description |
@@ -261,14 +284,14 @@ To make this study more useful to the MOSAIC team as a whole the working part of
 | position | skyfield position format | Position of oberserver |
 | fInput | number (double works best) | frequency of object of interest |
 
-### Library dependencies 
+### Library dependencies  <a name="dopplerLibrary"></a>
 If one wishes just to copy the function generateDistance() one needs the python libraries outlined below. One is able to copy these dependcies as written in this readme for ease of use. 
 ```
   from skyfield.api import load, wgs84, EarthSatellite, N, W,utc
   from skyfield.iokit import parse_tle_file
   from datetime import datetime as dt
 ```
-### Function Dependencies
+### Function Dependencies <a name="dopplerFunction"></a>
 If one wishes just to copy the function dopplerEffect() one needs the functions from other parts of the MOSAIC organization outlined below. These functions also appear in the dopplerEffect.py program. Please see the section on using this program/function for more details on how to copy these functions into your code. 
 
   - satelliteParser()  -  note: this means that the code works with TLEs generated by the databaseGeneratorV1.py script
@@ -353,7 +376,7 @@ def positionAtTime(number,time,position):
     return [alt.radians, az.radians]
 ```
 
-### Function as Written
+### Function as Written <a name="dopplerWritten"></a>
 For ease of use I have copied the generateDistance() function below for quick analysis by interested parties.
 
 ```
