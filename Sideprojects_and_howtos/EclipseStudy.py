@@ -135,18 +135,22 @@ location = wgs84.latlon(latidude * N, longitude * W)
 
 out = generateDistance(day,month,year, SatelliteID)
 
-# print(out)
-figure, axes = plt.subplots()
-monthstr = str(month)
-daystr = str(day)
-satelliteName = temp[0]
+# a = np.asarray([ [1,2,3], [4,5,6], [7,8,9] ])
+np.savetxt("EclipseStudyOut.csv", out, delimiter=",")
 
-satelliteName= satelliteName.replace("0", " ")
-satelliteName= satelliteName.strip()
-plt.title("distance " +satelliteName+ " from sun on " + monthstr + '/' + daystr)
-plt.xlabel("minutes in a day")
-plt.ylabel("angular separation (deg)")
-x = np.arange(1440*daysElapsed)
-plt.plot(x,out,'.',color = 'blue')
-plt.ylim(0,180)
-plt.show()
+
+# print(out)
+# figure, axes = plt.subplots()
+# monthstr = str(month)
+# daystr = str(day)
+# satelliteName = temp[0]
+
+# satelliteName= satelliteName.replace("0", " ")
+# satelliteName= satelliteName.strip()
+# plt.title("distance " +satelliteName+ " from sun on " + monthstr + '/' + daystr)
+# plt.xlabel("minutes in a day")
+# plt.ylabel("angular separation (deg)")
+# x = np.arange(1440*daysElapsed)
+# plt.plot(x,out,'.',color = 'blue')
+# plt.ylim(0,180)
+# plt.show()
