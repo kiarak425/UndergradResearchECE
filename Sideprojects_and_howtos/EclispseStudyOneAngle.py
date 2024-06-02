@@ -3,18 +3,12 @@ from skyfield.iokit import parse_tle_file
 from datetime import datetime as dt
 import numpy as np
 from matplotlib import pyplot as plt
-import configparser
 
-
-config = configparser.ConfigParser()
-config.read("./EclipseStudy.ini")
 month = 6
 day = 1
 year = 2024
-# oneDayTrack = bool(config.get("configuration","oneDay"))
-# daysElapsed = int(config.get("configuration","daysToTrack"))
-latidude = float(config.get("configuration","latitude"))
-longitude = float(config.get("configuration","longitude"))
+latidude = 37.2296
+longitude = 80.4139
 
 def satelliteParser():
     #files and opens the file
@@ -124,17 +118,3 @@ location = wgs84.latlon(latidude * N, longitude * W)
 out = generateDistance(day,month,year, SatelliteID)
 
 print(out)
-# figure, axes = plt.subplots()
-# monthstr = str(month)
-# daystr = str(day)
-# satelliteName = temp[0]
-
-# satelliteName= satelliteName.replace("0", " ")
-# satelliteName= satelliteName.strip()
-# plt.title("distance " +satelliteName+ " from sun on " + monthstr + '/' + daystr)
-# plt.xlabel("minutes in a day")
-# plt.ylabel("angular separation (deg)")
-# x = np.arange(1440*daysElapsed)
-# plt.plot(x,out,'.',color = 'blue')
-# plt.ylim(0,180)
-# plt.show()
